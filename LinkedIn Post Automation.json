@@ -1,0 +1,233 @@
+{
+  "name": "LinkedIn Post Automation for TheRemoteSync",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the Lead Editor for TheRemoteSync — a publication for remote workers focused on Health, Tech & Flow.\n\nROLE & VOICE:\nWrite with the authority of a Senior Engineer mentoring a Junior. Be analytical, empathetic, direct, and confident. No fluff, no filler, no AI-sounding openers. Never start with \"In today's world,\" \"As a remote worker,\" or any variation of those.\n\nTOPIC: {{ $json.targetKeyword }}\n\n---\n\nCONTENT STRUCTURE (follow this exactly):\n\n**1. THE HOOK (1–2 lines)**\nOpen with the core problem or a sharp, counterintuitive observation. Make it specific enough to stop the scroll. No questions. No generic statements.\n\n**2. THE PROBLEM (2–3 short paragraphs)**\nExpand on why this is a real, frustrating issue for remote workers. Be precise. Use data, a relatable scenario, or a common mistake people make. Keep paragraphs to 2–3 lines max.\n\n**3. THE SOLUTION (2–3 short paragraphs + bullet points if listing 3+ items)**\nDeliver a clear, actionable fix. If recommending tools, habits, or steps, use bullet points. Each bullet should be one concrete action — not a vague suggestion.\n\n**4. THE TAKEAWAY (1–2 lines)**\nEnd with a strong, practical closer. Make it feel like advice from someone who's actually lived this — not a corporate memo. No hollow calls to action like \"What do you think?\"\n\n**5. HASHTAGS**\nAdd 10–12 highly relevant hashtags. Mix broad reach tags with niche-specific ones for TheRemoteSync audience (remote work, productivity, health, async work, distributed teams).\n\n---\n\nSTRICT RULES:\n- US English only\n- Short paragraphs (single sentence per paragraph)\n- Shoould be only 100 - 150 words\n- The Goal: Get them to the \"See More\" button quickly.\n- Double line breaks (\\n\\n) between each paragraph\n- Zero tech metaphors applied to health or lifestyle (no \"debugging,\" \"bandwidth,\" \"uptime,\" etc.)\n- No em-dash (—) overuse — use it once max\n- No filler phrases: \"It's important to note,\" \"At the end of the day,\" \"Game-changer\"\n- Do not start any sentence with \"I\"\n- Write for LinkedIn's feed — punchy, skimmable, human\n- for bullets, use '-' not '*'\n\nCRITICAL FORMATTING INSTRUCTION: Do not use any Markdown formatting. Strictly avoid using asterisks (*) for bolding or italics. Output clean, plain text only.\n\nAt the end of the post, include a clear call-to-action directing the reader to read the full guide using this exact URL: {{ $json.articleUrl }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "f25b41ee-6066-4374-bd51-ebbfcb050aa3",
+      "name": "Message a model",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 3,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4DsJ0eYeMo3EIXJ6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "postAs": "organization",
+        "organization": "111123153",
+        "text": "={{ $json.content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "977a664f-5f5a-4862-ba5a-f807e275e740",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "sZDfC9bPvFK4aRwF",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// 1. Pick a random row\nconst randomIndex = Math.floor(Math.random() * items.length);\nconst randomRow = items[randomIndex];\n\n// 2. Access the simplified property directly\nconst keywordString = randomRow.json.property_main_kw;\n\n// 3. Output the clean JSON\nreturn [{\n    json: {\n        targetKeyword: keywordString\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b58c8a21-1ab7-43cb-b31c-077275c8f7b4",
+      "name": "Isolate Keyword"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2efa3672-408c-8039-978d-c22ba194bac4",
+          "mode": "list",
+          "cachedResultName": "ARTICLES",
+          "cachedResultUrl": "https://www.notion.so/2efa3672408c8039978dc22ba194bac4"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Published|date",
+              "condition": "is_not_empty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9d613f35-27f4-467d-a4ce-5f0c6222e2b0",
+      "name": "Get Keywords",
+      "credentials": {
+        "notionApi": {
+          "id": "zQQLBBhnzvZvThSg",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://theremotesync.com/post-sitemap.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d202e47c-5aa3-461f-b06d-44fc77238e9d",
+      "name": "Get Sitemap"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Explicitly grab the raw XML string from the 'Get Sitemap' node\nconst sitemapData = $('Get Sitemap').first();\nconst xmlText = (sitemapData && sitemapData.json && sitemapData.json.data) ? String(sitemapData.json.data) : \"\";\n\n// 2. Retrieve the keyword from the 'Isolate Keyword' node\nconst previousNodeData = $('Isolate Keyword').first();\nlet targetKeyword = \"\";\n\nif (previousNodeData && previousNodeData.json && previousNodeData.json.targetKeyword) {\n    targetKeyword = previousNodeData.json.targetKeyword;\n}\n\ntargetKeyword = String(targetKeyword);\n\n// 3. Convert the keyword into a URL slug\nconst slug = targetKeyword.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\n\n// 4. Default fallback URL\nlet articleUrl = \"https://theremotesync.com\";\n\n// 5. Run the Regex ONLY if the xmlText successfully loaded\nif (xmlText) {\n    const regex = new RegExp(`<loc>(https:\\\\/\\\\/theremotesync\\\\.com\\\\/[^<]*${slug}[^<]*)<\\\\/loc>`, 'i');\n    const match = xmlText.match(regex);\n    if (match) {\n        articleUrl = match[1];\n    }\n}\n\n// 6. Output both the keyword and the URL for the Gemini node\nreturn [{\n    json: {\n        targetKeyword: targetKeyword,\n        articleUrl: articleUrl\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "f1d3dc5f-76e5-40d4-b76d-11882d6febbb",
+      "name": "Get Relevant URL"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "f2f8e02d-f20d-4d54-85ff-9c89c9d3b0d0",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Isolate Keyword": {
+      "main": [
+        [
+          {
+            "node": "Get Sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Keywords": {
+      "main": [
+        [
+          {
+            "node": "Isolate Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sitemap": {
+      "main": [
+        [
+          {
+            "node": "Get Relevant URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Relevant URL": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d46391bf-9844-4fcc-be37-32b211180d5e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b78800965a919c0710a7550a6d7c48c20ce2f9b223e8b7565d93335d05485248"
+  },
+  "id": "4qeCwjO1fi6bA4zi",
+  "tags": []
+}
