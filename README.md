@@ -37,7 +37,7 @@ The execution begins with an **n8n Form Trigger**. The form has three fields: a 
 
 ### 2. URL Extraction (Random Mode only)
 
-This step only runs when Random Mode is selected. An HTTP GET request fetches the raw XML from `https://theremotesync.com/post-sitemap.xml`. A custom JavaScript node converts the selected keyword into a URL-friendly slug and uses Regular Expressions (Regex) to locate the exact `<loc>` tag containing the matching article link. It outputs a clean JSON object containing `targetKeyword` and `articleUrl`.
+This step only runs when Random Mode is selected. An HTTP GET request fetches the raw XML from `https://mywebsite.com/post-sitemap.xml`. A custom JavaScript node converts the selected keyword into a URL-friendly slug and uses Regular Expressions (Regex) to locate the exact `<loc>` tag containing the matching article link. It outputs a clean JSON object containing `targetKeyword` and `articleUrl`.
 
 In Manual Mode, this step is skipped. The `targetKeyword` and `articleUrl` values come directly from the form instead, so the URL you type in needs to be the exact, correct link.
 
@@ -87,7 +87,3 @@ To execute the pipeline, do not use the standard "Test workflow" button at the b
 4. If **Random**, leave the Keyword and URL fields blank. The workflow picks both for you.
 5. If **Manual**, fill in both the Keyword and the exact article URL you want the post to link to.
 6. Click **Submit**. The workflow will run synchronously and output the final execution log.
-
-## About
-
-No description, website, or topics provided.
