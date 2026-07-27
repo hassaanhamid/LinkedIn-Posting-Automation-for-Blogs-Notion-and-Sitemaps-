@@ -22,8 +22,8 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.1,
       "position": [
-        880,
-        0
+        800,
+        -240
       ],
       "id": "f25b41ee-6066-4374-bd51-ebbfcb050aa3",
       "name": "Message a model",
@@ -39,35 +39,13 @@
     },
     {
       "parameters": {
-        "postAs": "organization",
-        "organization": "111123153",
-        "text": "={{ $json.content.parts[0].text }}",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.linkedIn",
-      "typeVersion": 1,
-      "position": [
-        1232,
-        0
-      ],
-      "id": "977a664f-5f5a-4862-ba5a-f807e275e740",
-      "name": "Create a post",
-      "credentials": {
-        "linkedInOAuth2Api": {
-          "id": "sZDfC9bPvFK4aRwF",
-          "name": "LinkedIn account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "jsCode": "const items = $input.all();\n\n// 1. Pick a random row\nconst randomIndex = Math.floor(Math.random() * items.length);\nconst randomRow = items[randomIndex];\n\n// 2. Access the simplified property directly\nconst keywordString = randomRow.json.property_main_kw;\n\n// 3. Output the clean JSON\nreturn [{\n    json: {\n        targetKeyword: keywordString\n    }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        0
+        128,
+        -144
       ],
       "id": "b58c8a21-1ab7-43cb-b31c-077275c8f7b4",
       "name": "Isolate Keyword"
@@ -83,6 +61,7 @@
           "cachedResultName": "ARTICLES",
           "cachedResultUrl": "https://www.notion.so/2efa3672408c8039978dc22ba194bac4"
         },
+        "returnAll": true,
         "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
@@ -98,8 +77,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        0,
-        0
+        -96,
+        -144
       ],
       "id": "9d613f35-27f4-467d-a4ce-5f0c6222e2b0",
       "name": "Get Keywords",
@@ -118,8 +97,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        448,
-        0
+        352,
+        -144
       ],
       "id": "d202e47c-5aa3-461f-b06d-44fc77238e9d",
       "name": "Get Sitemap"
@@ -131,22 +110,183 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        656,
-        0
+        576,
+        -144
       ],
       "id": "f1d3dc5f-76e5-40d4-b76d-11882d6febbb",
       "name": "Get Relevant URL"
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/rest/posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linkedInOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "LinkedIn-Version",
+              "value": "202604"
+            },
+            {
+              "name": "X-Restli-Protocol-Version",
+              "value": "2.0.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"author\": \"urn:li:organization:111123153\",\n  \"commentary\": {{ JSON.stringify($json.content.parts[0].text.replace(/([|{}@[\\]()<>#\\\\*_~])/g, '\\\\$1')) }},\n  \"visibility\": \"PUBLIC\",\n  \"distribution\": {\n    \"feedDistribution\": \"MAIN_FEED\",\n    \"targetEntities\": [],\n    \"thirdPartyDistributionChannels\": []\n  },\n  \"lifecycleState\": \"PUBLISHED\",\n  \"isReshareDisabledByAuthor\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
       "position": [
-        -224,
-        0
+        1152,
+        -240
       ],
-      "id": "f2f8e02d-f20d-4d54-85ff-9c89c9d3b0d0",
-      "name": "When clicking ‘Execute workflow’"
+      "id": "2a31c1ea-e604-43cc-a3fb-e5b350853e3c",
+      "name": "HTTP Request",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "sZDfC9bPvFK4aRwF",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "LinkedIn Posting",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Mode",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Manual"
+                  },
+                  {
+                    "option": "Random"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Keyword"
+            },
+            {
+              "fieldLabel": "URL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -544,
+        -240
+      ],
+      "id": "40d8e3f4-4306-4a19-a52a-3002accec5c3",
+      "name": "On form submission",
+      "webhookId": "06eca34d-76bd-4515-87fd-1b09b0175c5d"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Mode }}",
+                    "rightValue": "Manual",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "663f5a51-038f-4ff6-8d9e-3652a387c341"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OutputManual"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1a59ad01-e367-4dd7-8eb6-4c85a3e973ac",
+                    "leftValue": "={{ $json.Mode }}",
+                    "rightValue": "Random",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OutputRandom"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -320,
+        -240
+      ],
+      "id": "c54004db-bda7-4344-ba84-254a5c20a177",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5fc7f3dc-cb5b-4465-86c3-a3578936ccec",
+              "name": "targetKeyword",
+              "value": "={{ $json.Keyword }}",
+              "type": "string"
+            },
+            {
+              "id": "4972d6d9-5e7a-45a2-9421-0c8bef013ea2",
+              "name": "articleUrl",
+              "value": "={{ $json.URL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -336
+      ],
+      "id": "19f65d94-223e-46a3-b513-2d8db1a68393",
+      "name": "Edit Fields"
     }
   ],
   "pinData": {},
@@ -155,7 +295,7 @@
       "main": [
         [
           {
-            "node": "Create a post",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
@@ -206,11 +346,40 @@
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
+    "On form submission": {
       "main": [
         [
           {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Get Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
             "type": "main",
             "index": 0
           }
@@ -223,7 +392,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d46391bf-9844-4fcc-be37-32b211180d5e",
+  "versionId": "769dc56b-d583-4baa-b3ef-61902746a310",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b78800965a919c0710a7550a6d7c48c20ce2f9b223e8b7565d93335d05485248"
